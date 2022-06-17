@@ -160,8 +160,9 @@ class AUDACITY_DLL_API Ruler {
       int pos;
       int lx, ly;
       TranslatableString text;
+      TranslatableString units;
 
-      void Draw(wxDC &dc, bool twoTone, wxColour c) const;
+      void Draw(wxDC &dc, bool twoTone, wxColour c, std::unique_ptr<Fonts> &fonts) const;
    };
    using Labels = std::vector<Label>;
 

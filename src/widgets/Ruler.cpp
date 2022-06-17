@@ -600,7 +600,7 @@ TickSizes( double UPP, int orientation, RulerFormat format, bool log )
 }
 
 TranslatableString LabelString(
-   double d, RulerFormat format, const TranslatableString &units )
+   double d, RulerFormat format )
    const
 {
    // Given a value, turn it into a string according
@@ -747,8 +747,6 @@ TranslatableString LabelString(
    }
 
    auto result = Verbatim( s );
-   if (!units.empty())
-      result += units;
 
    return result;
 }
@@ -772,9 +770,12 @@ auto Ruler::MakeTick(
    dc.SetFont( font );
 
    wxCoord strW, strH, strD, strL;
-   auto str = lab.text;
+   auto strText = lab.text;
+   auto strUnits = lab.units;
+   auto str = strText + strUnits;
    // Do not put the text into results until we are sure it does not overlap
    lab.text = {};
+   lab.units = {};
    dc.GetTextExtent(str.Translation(), &strW, &strH, &strD, &strL);
 
    int strPos, strLen, strLeft, strTop;
@@ -842,7 +843,8 @@ auto Ruler::MakeTick(
       bits[strPos+i] = true;
 
    // Good to display the text
-   lab.text = str;
+   lab.text = strText;
+   lab.units = strUnits;
    return { { strLeft, strTop, strW, strH }, lab };
 }
 
@@ -940,7 +942,8 @@ bool Ruler::Updater::Tick( wxDC &dc,
    Label lab;
    lab.value = d;
    lab.pos = pos;
-   lab.text = tickSizes.LabelString( d, mFormat, mUnits );
+   lab.text = tickSizes.LabelString( d, mFormat );
+   lab.units = mUnits;
 
    const auto result = MakeTick(
       lab,
@@ -1199,8 +1202,10 @@ void Ruler::Updater::UpdateLinear(
       // Old code dropped the labels AND their ticks, like so:
       //    mMinorLabels.clear();
       // Nowadays we just drop the labels.
-      for( auto &label : allOutputs.minorLabels )
+      for (auto& label : allOutputs.minorLabels) {
          label.text = {};
+         label.units = {};
+      }
    }
 
    // Left and Right Edges
@@ -1498,7 +1503,7 @@ void Ruler::Draw(wxDC& dc, const Envelope* envelope) const
          }
       }
 
-      label.Draw(dc, mTwoTone, mTickColour);
+      label.Draw(dc, mTwoTone, mTickColour, mpFonts);
    };
 
    for( const auto &label : cache.mMajorLabels )
@@ -1662,7 +1667,7 @@ void Ruler::SetCustomMinorLabels(
 }
 #endif
 
-void Ruler::Label::Draw(wxDC&dc, bool twoTone, wxColour c) const
+void Ruler::Label::Draw(wxDC&dc, bool twoTone, wxColour c, std::unique_ptr<Fonts> &fonts) const
 {
    if (!text.empty()) {
       bool altColor = twoTone && value < 0.0;
@@ -1673,7 +1678,20 @@ void Ruler::Label::Draw(wxDC&dc, bool twoTone, wxColour c) const
       dc.SetTextForeground(altColor ? *wxBLUE : *wxBLACK);
 #endif
       dc.SetBackgroundMode(wxTRANSPARENT);
-      dc.DrawText(text.Translation(), lx, ly);
+
+      // Do not draw units as bolded
+      if (dc.GetFont() == fonts->major) {
+         dc.DrawText(text.Translation(), lx, ly);
+         wxSize textSize = dc.GetTextExtent(text.Translation());
+         dc.SetFont(fonts->minor);
+         int unitX = lx + textSize.GetWidth();
+         dc.DrawText(units.Translation(), unitX, ly);
+         dc.SetFont(fonts->major);
+      }
+      else {
+         auto str = text + units;
+         dc.DrawText(str.Translation(), lx, ly);
+      }
    }
 }
 

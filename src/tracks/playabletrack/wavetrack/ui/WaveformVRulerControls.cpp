@@ -228,7 +228,7 @@ void WaveformVRulerControls::DoUpdateVRuler(
       wxASSERT(scaleType == WaveformSettings::stLogarithmic);
       scaleType = WaveformSettings::stLogarithmic;
       
-      vruler->SetUnits({});
+      vruler->SetUnits({XO("dB")});
       
       float min, max;
       wt->GetDisplayBounds(&min, &max);
