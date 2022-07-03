@@ -310,9 +310,9 @@ void Ruler::OfflimitsPixels(int start, int end)
       return;
 
    auto size = static_cast<size_t>( length + 1 );
-   if ( mUserBits.size() < size ) {
+   if ( mOfflimitPixels.size() < size ) {
       mLength = length;
-      mUserBits.resize( size, false );
+      mOfflimitPixels.resize( size, false );
    }
 
    if (end < start)
@@ -324,7 +324,7 @@ void Ruler::OfflimitsPixels(int start, int end)
       end = mLength;
 
    for(int i = start; i <= end; i++)
-      mUserBits[i] = true;
+      mOfflimitPixels[i] = true;
 
    Invalidate();
 }
@@ -351,7 +351,7 @@ void Ruler::Invalidate()
 
    mpCache.reset();
    // Bug 2316 we must preserve off-limit pixels.
-   // mUserBits.clear();
+   // mOfflimitPixels.clear();
 }
 
 struct Ruler::TickSizes
@@ -945,7 +945,7 @@ struct Ruler::CustomUpdater : public virtual Ruler::Updater {
 };
 
 struct Ruler::Cache {
-   Bits mBits;
+   Bits mPixels;
    Labels mMajorLabels, mMinorLabels, mMinorMinorLabels;
    wxRect mRect;
 };
@@ -1432,8 +1432,8 @@ void Ruler::UpdateCache(
       cache.mMinorMinorLabels.clear();
    }
 
-   cache.mBits = mUserBits;
-   cache.mBits.resize( static_cast<size_t>(mLength + 1), false );
+   cache.mPixels = mOfflimitPixels;
+   cache.mPixels.resize( static_cast<size_t>(mLength + 1), false );
 
    Updater * updater;
    if ( mCustom ) {
@@ -1451,7 +1451,7 @@ void Ruler::UpdateCache(
    
    Updater::UpdateOutputs allOutputs{
       cache.mMajorLabels, cache.mMinorLabels, cache.mMinorMinorLabels,
-      cache.mBits, cache.mRect
+      cache.mPixels, cache.mRect
    };
    updater->Update(dc, envelope, allOutputs);
 }

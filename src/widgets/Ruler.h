@@ -193,7 +193,7 @@ private:
    double       mMin, mMax;
    double       mHiddenMin, mHiddenMax;
 
-   Bits mUserBits;
+   Bits mOfflimitPixels;
 
    static std::pair< wxRect, Label > MakeTick(
       Label lab,
