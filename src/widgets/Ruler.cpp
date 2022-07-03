@@ -894,20 +894,54 @@ struct Ruler::Updater {
 
    static void ChooseFonts(
       std::unique_ptr<Fonts> &pFonts, const Fonts *pUserFonts,
-      wxDC &dc, int desiredPixelHeight );
+      wxDC &dc, int desiredPixelHeight
+   );
 
    struct UpdateOutputs;
+
+   void BoxAdjust(
+      UpdateOutputs& allOutputs
+   )
+      const;
    
-   void Update(
+   virtual void Update(
       wxDC &dc, const Envelope* envelope,
       UpdateOutputs &allOutputs
    )// Envelope *speedEnv, long minSpeed, long maxSpeed )
-      const;
+      const = 0;
+};
 
-   void UpdateCustom( wxDC &dc, UpdateOutputs &allOutputs ) const;
-   void UpdateLinear(
-      wxDC &dc, const Envelope *envelope, UpdateOutputs &allOutputs ) const;
-   void UpdateNonlinear( wxDC &dc, UpdateOutputs &allOutputs ) const;
+struct Ruler::LinearUpdater : public virtual Ruler::Updater {
+   explicit LinearUpdater( const Ruler &ruler, const ZoomInfo *z )
+   : Updater{ ruler, z }
+   {}
+
+   void Update(
+      wxDC &dc, const Envelope* envelope,
+      UpdateOutputs &allOutputs
+   ) const override;
+};
+
+struct Ruler::LogarithmicUpdater : public virtual Ruler::Updater {
+   explicit LogarithmicUpdater( const Ruler &ruler, const ZoomInfo *z )
+   : Updater{ ruler, z }
+   {}
+
+   void Update(
+      wxDC &dc, const Envelope* envelope,
+      UpdateOutputs &allOutputs
+   ) const override;
+};
+
+struct Ruler::CustomUpdater : public virtual Ruler::Updater {
+   explicit CustomUpdater( const Ruler &ruler, const ZoomInfo *z )
+   : Updater{ ruler, z }
+   {}
+
+   void Update(
+      wxDC &dc, const Envelope* envelope,
+      UpdateOutputs &allOutputs
+   ) const override;
 };
 
 struct Ruler::Cache {
@@ -1049,7 +1083,50 @@ void Ruler::Updater::ChooseFonts(
    fonts.minorMinor = wxFont{ fontSize - 1, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL };
 }
 
-void Ruler::Updater::UpdateCustom( wxDC &dc, UpdateOutputs &allOutputs ) const
+void Ruler::Updater::BoxAdjust(
+   UpdateOutputs &allOutputs
+)
+   const
+{
+   int displacementx=0, displacementy=0;
+   auto &box = allOutputs.box;
+   if (!mFlip) {
+      if (mOrientation==wxHORIZONTAL) {
+         int d = mTop + box.GetHeight() + 5;
+         box.Offset(0,d);
+         box.Inflate(0,5);
+         displacementx=0;
+         displacementy=d;
+      }
+      else {
+         int d = mLeft - box.GetLeft() + 5;
+         box.Offset(d,0);
+         box.Inflate(5,0);
+         displacementx=d;
+         displacementy=0;
+      }
+   }
+   else {
+      if (mOrientation==wxHORIZONTAL) {
+         box.Inflate(0,5);
+         displacementx=0;
+         displacementy=0;
+      }
+   }
+   auto update = [=]( Label &label ){
+      label.lx += displacementx;
+      label.ly += displacementy;
+   };
+   for( auto &label : allOutputs.majorLabels )
+      update( label );
+   for( auto &label : allOutputs.minorLabels )
+      update( label );
+   for( auto &label : allOutputs.minorMinorLabels )
+      update( label );
+}
+
+void Ruler::CustomUpdater::Update(
+   wxDC &dc, const Envelope *envelope, UpdateOutputs &allOutputs ) const
 {
    TickOutputs majorOutputs{
       allOutputs.majorLabels, allOutputs.bits, allOutputs.box };
@@ -1061,9 +1138,11 @@ void Ruler::Updater::UpdateCustom( wxDC &dc, UpdateOutputs &allOutputs ) const
 
    for( int i = 0; (i<numLabel) && (i<=mLength); ++i )
       TickCustom( dc, i, mFonts.major, majorOutputs );
+
+   BoxAdjust(allOutputs);
 }
 
-void Ruler::Updater::UpdateLinear(
+void Ruler::LinearUpdater::Update(
    wxDC &dc, const Envelope *envelope, UpdateOutputs &allOutputs ) const
 {
    TickOutputs majorOutputs{
@@ -1208,10 +1287,12 @@ void Ruler::Updater::UpdateLinear(
       Tick( dc, 0, mMin, tickSizes, mFonts.major, majorOutputs );
       Tick( dc, mLength, mMax, tickSizes, mFonts.major, majorOutputs );
    }
+
+   BoxAdjust(allOutputs);
 }
 
-void Ruler::Updater::UpdateNonlinear(
-    wxDC &dc, UpdateOutputs &allOutputs ) const
+void Ruler::LogarithmicUpdater::Update(
+   wxDC &dc, const Envelope *envelope, UpdateOutputs &allOutputs) const
 {
    TickOutputs majorOutputs{
       allOutputs.majorLabels, allOutputs.bits, allOutputs.box };
@@ -1297,59 +1378,8 @@ void Ruler::Updater::UpdateNonlinear(
       }
       decade *= step;
    }
-}
 
-void Ruler::Updater::Update(
-   wxDC &dc, const Envelope* envelope,
-   UpdateOutputs &allOutputs
-)// Envelope *speedEnv, long minSpeed, long maxSpeed )
-   const
-{
-   TickOutputs majorOutputs{
-      allOutputs.majorLabels, allOutputs.bits, allOutputs.box };
-
-   if ( mCustom )
-      UpdateCustom( dc, allOutputs );
-   else if ( !mLog )
-      UpdateLinear( dc, envelope, allOutputs );
-   else
-      UpdateNonlinear( dc, allOutputs );
-
-   int displacementx=0, displacementy=0;
-   auto &box = allOutputs.box;
-   if (!mFlip) {
-      if (mOrientation==wxHORIZONTAL) {
-         int d = mTop + box.GetHeight() + 5;
-         box.Offset(0,d);
-         box.Inflate(0,5);
-         displacementx=0;
-         displacementy=d;
-      }
-      else {
-         int d = mLeft - box.GetLeft() + 5;
-         box.Offset(d,0);
-         box.Inflate(5,0);
-         displacementx=d;
-         displacementy=0;
-      }
-   }
-   else {
-      if (mOrientation==wxHORIZONTAL) {
-         box.Inflate(0,5);
-         displacementx=0;
-         displacementy=0;
-      }
-   }
-   auto update = [=]( Label &label ){
-      label.lx += displacementx;
-      label.ly += displacementy;
-   };
-   for( auto &label : allOutputs.majorLabels )
-      update( label );
-   for( auto &label : allOutputs.minorLabels )
-      update( label );
-   for( auto &label : allOutputs.minorMinorLabels )
-      update( label );
+   BoxAdjust(allOutputs);
 }
 
 void Ruler::ChooseFonts( wxDC &dc ) const
@@ -1405,14 +1435,25 @@ void Ruler::UpdateCache(
    cache.mBits = mUserBits;
    cache.mBits.resize( static_cast<size_t>(mLength + 1), false );
 
-   // Keep Updater const!  We want no hidden state changes affecting its
-   // computations.
-   const Updater updater{ *this, zoomInfo };
+   Updater * updater;
+   if ( mCustom ) {
+      CustomUpdater cUpdater{ *this, zoomInfo };
+      updater = &cUpdater;
+   }
+   else if ( !mLog ) {
+      LinearUpdater linUpdater{ *this, zoomInfo };
+      updater = &linUpdater;
+   }
+   else {
+      LogarithmicUpdater logUpdater{ *this, zoomInfo };
+      updater = &logUpdater;
+   }
+   
    Updater::UpdateOutputs allOutputs{
       cache.mMajorLabels, cache.mMinorLabels, cache.mMinorMinorLabels,
       cache.mBits, cache.mRect
    };
-   updater.Update(dc, envelope, allOutputs);
+   updater->Update(dc, envelope, allOutputs);
 }
 
 auto Ruler::GetFonts() const -> Fonts

@@ -172,6 +172,9 @@ class AUDACITY_DLL_API Ruler {
    void UpdateCache( wxDC &dc, const Envelope* envelope ) const;
 
    struct Updater;
+   struct LinearUpdater;
+   struct LogarithmicUpdater;
+   struct CustomUpdater;
    
 public:
    bool mbTicksOnly; // true => no line the length of the ruler
