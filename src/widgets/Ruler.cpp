@@ -1208,7 +1208,7 @@ void Ruler::LinearUpdater::Update(
       TickAtValue( 0.0 );
    }
 
-   double sg = UPP > 0.0? 1.0: -1.0;
+   double sign = UPP > 0.0? 1.0: -1.0;
 
    int nDroppedMinorLabels=0;
    // Major and minor ticks
@@ -1237,7 +1237,7 @@ void Ruler::LinearUpdater::Update(
          warpedD = d;
       // using ints doesn't work, as
       // this will overflow and be negative at high zoom.
-      double step = floor(sg * warpedD / denom);
+      double step = floor(sign * warpedD / denom);
       while (ii <= mLength) {
          ii++;
          if (zoomInfo)
@@ -1255,11 +1255,11 @@ void Ruler::LinearUpdater::Update(
             warpedD = nextD;
          d = nextD;
 
-         if (floor(sg * warpedD / denom) > step) {
-            step = floor(sg * warpedD / denom);
+         if (floor(sign * warpedD / denom) > step) {
+            step = floor(sign * warpedD / denom);
             bool major = jj == 0;
             tickSizes.useMajor = major;
-            bool ticked = Tick( dc, ii, sg * step * denom, tickSizes,
+            bool ticked = Tick( dc, ii, sign * step * denom, tickSizes,
                font, outputs );
             if( !major && !ticked ){
                nDroppedMinorLabels++;
