@@ -1508,8 +1508,6 @@ void Ruler::Draw(wxDC& dc, const Envelope* envelope) const
       }
    }
 
-   dc.SetFont( mpFonts->major );
-
    // We may want to not show the ticks at the extremes,
    // though still showing the labels.
    // This gives a better look when the ruler is on a bevelled
@@ -1541,6 +1539,8 @@ void Ruler::Draw(wxDC& dc, const Envelope* envelope) const
 
       label.Draw(dc, mTwoTone, mTickColour);
    };
+
+   dc.SetFont(mpFonts->major);
 
    for( const auto &label : cache.mMajorLabels )
       drawLabel( label, 4 );
