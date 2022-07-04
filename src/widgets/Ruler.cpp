@@ -377,156 +377,156 @@ TickSizes( double UPP, int orientation, RulerFormat format, bool log )
    // that are easy for humans to grok.  This is the most tricky
    // with time.
 
-   double d;
+   double tempUnits;
 
    // As a heuristic, we want at least 22 pixels between each 
    // minor tick.  We want to show numbers like "-48"
    // in that space.
    // If vertical, we don't need as much space.
-   double units = ((orientation == wxHORIZONTAL) ? 22 : 16) * fabs(UPP);
+   double unitsBetweenTicks = ((orientation == wxHORIZONTAL) ? 22 : 16) * fabs(UPP);
 
    mDigits = 0;
 
    switch(format) {
    case LinearDBFormat:
-      if (units < 0.001) {
+      if (unitsBetweenTicks < 0.001) {
          mMinor = 0.001;
          mMajor = 0.005;
          return;
       }
-      if (units < 0.01) {
+      if (unitsBetweenTicks < 0.01) {
          mMinor = 0.01;
          mMajor = 0.05;
          return;
       }
-      if (units < 0.1) {
+      if (unitsBetweenTicks < 0.1) {
          mMinor = 0.1;
          mMajor = 0.5;
          return;
       }
-      if (units < 1.0) {
+      if (unitsBetweenTicks < 1.0) {
          mMinor = 1.0;
          mMajor = 6.0;
          return;
       }
-      if (units < 3.0) {
+      if (unitsBetweenTicks < 3.0) {
          mMinor = 3.0;
          mMajor = 12.0;
          return;
       }
-      if (units < 6.0) {
+      if (unitsBetweenTicks < 6.0) {
          mMinor = 6.0;
          mMajor = 24.0;
          return;
       }
-      if (units < 12.0) {
+      if (unitsBetweenTicks < 12.0) {
          mMinor = 12.0;
          mMajor = 48.0;
          return;
       }
-      if (units < 24.0) {
+      if (unitsBetweenTicks < 24.0) {
          mMinor = 24.0;
          mMajor = 96.0;
          return;
       }
-      d = 20.0;
+      tempUnits = 20.0;
       for(;;) {
-         if (units < d) {
-            mMinor = d;
-            mMajor = d*5.0;
+         if (unitsBetweenTicks < tempUnits) {
+            mMinor = tempUnits;
+            mMajor = tempUnits*5.0;
             return;
          }
-         d *= 5.0;
-         if (units < d) {
-            mMinor = d;
-            mMajor = d*5.0;
+         tempUnits *= 5.0;
+         if (unitsBetweenTicks < tempUnits) {
+            mMinor = tempUnits;
+            mMajor = tempUnits*5.0;
             return;
          }
-         d *= 2.0;
+         tempUnits *= 2.0;
       }
       break;
 
    case IntFormat:
-      d = 1.0;
+      tempUnits = 1.0;
       for(;;) {
-         if (units < d) {
-            mMinor = d;
-            mMajor = d*5.0;
+         if (unitsBetweenTicks < tempUnits) {
+            mMinor = tempUnits;
+            mMajor = tempUnits*5.0;
             return;
          }
-         d *= 5.0;
-         if (units < d) {
-            mMinor = d;
-            mMajor = d*2.0;
+         tempUnits *= 5.0;
+         if (unitsBetweenTicks < tempUnits) {
+            mMinor = tempUnits;
+            mMajor = tempUnits*2.0;
             return;
          }
-         d *= 2.0;
+         tempUnits *= 2.0;
       }
       break;
 
    case TimeFormat:
-      if (units > 0.5) {
-         if (units < 1.0) { // 1 sec
+      if (unitsBetweenTicks > 0.5) {
+         if (unitsBetweenTicks < 1.0) { // 1 sec
             mMinor = 1.0;
             mMajor = 5.0;
             return;
          }
-         if (units < 5.0) { // 5 sec
+         if (unitsBetweenTicks < 5.0) { // 5 sec
             mMinor = 5.0;
             mMajor = 15.0;
             return;
          }
-         if (units < 10.0) {
+         if (unitsBetweenTicks < 10.0) {
             mMinor = 10.0;
             mMajor = 30.0;
             return;
          }
-         if (units < 15.0) {
+         if (unitsBetweenTicks < 15.0) {
             mMinor = 15.0;
             mMajor = 60.0;
             return;
          }
-         if (units < 30.0) {
+         if (unitsBetweenTicks < 30.0) {
             mMinor = 30.0;
             mMajor = 60.0;
             return;
          }
-         if (units < 60.0) { // 1 min
+         if (unitsBetweenTicks < 60.0) { // 1 min
             mMinor = 60.0;
             mMajor = 300.0;
             return;
          }
-         if (units < 300.0) { // 5 min
+         if (unitsBetweenTicks < 300.0) { // 5 min
             mMinor = 300.0;
             mMajor = 900.0;
             return;
          }
-         if (units < 600.0) { // 10 min
+         if (unitsBetweenTicks < 600.0) { // 10 min
             mMinor = 600.0;
             mMajor = 1800.0;
             return;
          }
-         if (units < 900.0) { // 15 min
+         if (unitsBetweenTicks < 900.0) { // 15 min
             mMinor = 900.0;
             mMajor = 3600.0;
             return;
          }
-         if (units < 1800.0) { // 30 min
+         if (unitsBetweenTicks < 1800.0) { // 30 min
             mMinor = 1800.0;
             mMajor = 3600.0;
             return;
          }
-         if (units < 3600.0) { // 1 hr
+         if (unitsBetweenTicks < 3600.0) { // 1 hr
             mMinor = 3600.0;
             mMajor = 6*3600.0;
             return;
          }
-         if (units < 6*3600.0) { // 6 hrs
+         if (unitsBetweenTicks < 6*3600.0) { // 6 hrs
             mMinor = 6*3600.0;
             mMajor = 24*3600.0;
             return;
          }
-         if (units < 24*3600.0) { // 1 day
+         if (unitsBetweenTicks < 24*3600.0) { // 1 day
             mMinor = 24*3600.0;
             mMajor = 7*24*3600.0;
             return;
@@ -541,22 +541,22 @@ TickSizes( double UPP, int orientation, RulerFormat format, bool log )
       // the same way as for RealFormat)
 
    case RealFormat:
-      d = 0.000001;
+      tempUnits = 0.000001;
       // mDigits is number of digits after the decimal point.
       mDigits = 6;
       for(;;) {
-         if (units < d) {
-            mMinor = d;
-            mMajor = d*5.0;
+         if (unitsBetweenTicks < tempUnits) {
+            mMinor = tempUnits;
+            mMajor = tempUnits*5.0;
             return;
          }
-         d *= 5.0;
-         if (units < d) {
-            mMinor = d;
-            mMajor = d*2.0;
+         tempUnits *= 5.0;
+         if (unitsBetweenTicks < tempUnits) {
+            mMinor = tempUnits;
+            mMajor = tempUnits*2.0;
             return;
          }
-         d *= 2.0;
+         tempUnits *= 2.0;
          mDigits--;
          // More than 10 digit numbers?  Something is badly wrong.
          // Probably units is coming in with too high a value.
@@ -564,27 +564,27 @@ TickSizes( double UPP, int orientation, RulerFormat format, bool log )
          if( mDigits < -10 )
             break;
       }
-      mMinor = d;
-      mMajor = d * 2.0;
+      mMinor = tempUnits;
+      mMajor = tempUnits * 2.0;
       break;
 
    case RealLogFormat:
-      d = 0.000001;
+      tempUnits = 0.000001;
       // mDigits is number of digits after the decimal point.
       mDigits = 6;
       for(;;) {
-         if (units < d) {
-            mMinor = d;
-            mMajor = d*5.0;
+         if (unitsBetweenTicks < tempUnits) {
+            mMinor = tempUnits;
+            mMajor = tempUnits*5.0;
             return;
          }
-         d *= 5.0;
-         if (units < d) {
-            mMinor = d;
-            mMajor = d*2.0;
+         tempUnits *= 5.0;
+         if (unitsBetweenTicks < tempUnits) {
+            mMinor = tempUnits;
+            mMajor = tempUnits*2.0;
             return;
          }
-         d *= 2.0;
+         tempUnits *= 2.0;
          mDigits--;
          // More than 10 digit numbers?  Something is badly wrong.
          // Probably units is coming in with too high a value.
@@ -593,8 +593,8 @@ TickSizes( double UPP, int orientation, RulerFormat format, bool log )
             break;
       }
       mDigits++;
-      mMinor = d;
-      mMajor = d * 2.0;
+      mMinor = tempUnits;
+      mMajor = tempUnits * 2.0;
       break;
    }
 }
