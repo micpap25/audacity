@@ -116,6 +116,9 @@ Ruler::Ruler()
    mTwoTone = false;
 
    mUseZoomInfo = NULL;
+
+   // Default the updater to Linear, as it would be before removal of mLog
+   mpUpdater = std::make_unique<LinearUpdater>( *this, mUseZoomInfo );
 }
 
 Ruler::~Ruler()
@@ -137,6 +140,14 @@ void Ruler::SetFormat(RulerFormat format)
 
       Invalidate();
    }
+}
+
+void Ruler::SetUpdater(std::unique_ptr<Updater> pUpdater)
+{
+   // Should a comparison be made between mpUpdater and pUpdater?
+   // Runtime type comparison isn't clean in c++
+   mpUpdater = std::move(pUpdater);
+   Invalidate();
 }
 
 void Ruler::SetLog(bool log)
@@ -1434,26 +1445,12 @@ void Ruler::UpdateCache(
 
    cache.mBits = mUserBits;
    cache.mBits.resize( static_cast<size_t>(mLength + 1), false );
-
-   Updater * updater;
-   if ( mCustom ) {
-      CustomUpdater cUpdater{ *this, zoomInfo };
-      updater = &cUpdater;
-   }
-   else if ( !mLog ) {
-      LinearUpdater linUpdater{ *this, zoomInfo };
-      updater = &linUpdater;
-   }
-   else {
-      LogarithmicUpdater logUpdater{ *this, zoomInfo };
-      updater = &logUpdater;
-   }
    
    Updater::UpdateOutputs allOutputs{
       cache.mMajorLabels, cache.mMinorLabels, cache.mMinorMinorLabels,
       cache.mBits, cache.mRect
    };
-   updater->Update(dc, envelope, allOutputs);
+   mpUpdater->Update(dc, envelope, allOutputs);
 }
 
 auto Ruler::GetFonts() const -> Fonts
