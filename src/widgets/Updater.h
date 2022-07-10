@@ -47,8 +47,6 @@ struct AUDACITY_DLL_API Ruler::Updater {
    const int mLeftOffset = mRuler.mLeftOffset;
    const NumberScale mNumberScale = mRuler.mNumberScale;
 
-   struct TickOutputs;
-
    bool Tick(wxDC& dc,
       int pos, double d, const TickSizes& tickSizes, wxFont font,
       TickOutputs outputs
@@ -58,8 +56,6 @@ struct AUDACITY_DLL_API Ruler::Updater {
    bool TickCustom(wxDC& dc, int labelIdx, wxFont font,
       TickOutputs outputs
    ) const;
-
-   struct UpdateOutputs;
 
    void BoxAdjust(
       UpdateOutputs& allOutputs

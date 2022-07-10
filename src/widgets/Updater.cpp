@@ -22,13 +22,9 @@
 #include "Updater.h"
 #include "Ruler.h"
 
-struct Ruler::Updater::TickOutputs { Labels& labels; Bits& bits; wxRect& box; };
-struct Ruler::Updater::UpdateOutputs {
-   Labels& majorLabels, & minorLabels, & minorMinorLabels;
-   Bits& bits;
-   wxRect& box;
-};
-
+struct TickOutputs;
+struct UpdateOutputs;
+struct TickSizes;
 
 void Ruler::Updater::BoxAdjust(
    UpdateOutputs& allOutputs

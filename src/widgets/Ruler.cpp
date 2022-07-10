@@ -369,6 +369,14 @@ void Ruler::Invalidate()
    // mUserBits.clear();
 }
 
+
+struct Ruler::TickOutputs { Labels& labels; Bits& bits; wxRect& box; };
+struct Ruler::UpdateOutputs {
+   Labels& majorLabels, & minorLabels, & minorMinorLabels;
+   Bits& bits;
+   wxRect& box;
+};
+
 struct Ruler::TickSizes
 {
    bool useMajor = true;
@@ -942,10 +950,6 @@ void Ruler::UpdateCache(
    if ( mpCache )
       return;
 
-   const ZoomInfo *zoomInfo = NULL;
-   if (!mLog && mOrientation == wxHORIZONTAL)
-      zoomInfo = mUseZoomInfo;
-
    // This gets called when something has been changed
    // (i.e. we've been invalidated).  Recompute all
    // tick positions and font size.
@@ -979,7 +983,7 @@ void Ruler::UpdateCache(
    cache.mBits = mUserBits;
    cache.mBits.resize( static_cast<size_t>(mLength + 1), false );
    
-   Updater::UpdateOutputs allOutputs{
+   UpdateOutputs allOutputs{
       cache.mMajorLabels, cache.mMinorLabels, cache.mMinorMinorLabels,
       cache.mBits, cache.mRect
    };

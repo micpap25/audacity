@@ -15,7 +15,7 @@
 
 struct LogarithmicUpdater : public Updater {
    explicit LogarithmicUpdater(const Ruler& ruler, const ZoomInfo* z)
-      : Updater{ ruler, z }
+      : Updater{ ruler, NULL }
    {}
 
    void Update(

@@ -15,7 +15,7 @@
 
 struct Ruler::CustomUpdater : public Ruler::Updater {
    explicit CustomUpdater(const Ruler& ruler, const ZoomInfo* z)
-      : Updater{ ruler, z }
+      : Updater{ ruler, NULL }
    {}
 
    void Update(

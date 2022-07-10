@@ -163,6 +163,8 @@ private:
    void Invalidate();
 
  private:
+   struct TickOutputs;
+   struct UpdateOutputs;
    struct TickSizes;
 
    class Label {
