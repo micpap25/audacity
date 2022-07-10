@@ -13,7 +13,7 @@
 
 #include "Ruler.h"
 
-struct AUDACITY_DLL_API Ruler::Updater {
+struct Ruler::Updater {
    const Ruler& mRuler;
    const ZoomInfo* zoomInfo;
 

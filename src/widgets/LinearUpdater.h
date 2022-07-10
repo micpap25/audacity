@@ -12,8 +12,9 @@
 #define __AUDACITY_LINEAR_UPDATER__
 
 #include "Ruler.h"
+#include "Updater.h"
 
-struct LinearUpdater : public Updater {
+struct Ruler::LinearUpdater : public Ruler::Updater {
    explicit LinearUpdater(const Ruler& ruler, const ZoomInfo* z)
       : Updater{ ruler, z }
    {}

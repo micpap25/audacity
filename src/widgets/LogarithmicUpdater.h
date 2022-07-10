@@ -12,8 +12,9 @@
 #define __AUDACITY_LOGARITHMIC_UPDATER__
 
 #include "Ruler.h"
+#include "Updater.h"
 
-struct LogarithmicUpdater : public Updater {
+struct Ruler::LogarithmicUpdater : public Ruler::Updater {
    explicit LogarithmicUpdater(const Ruler& ruler, const ZoomInfo* z)
       : Updater{ ruler, NULL }
    {}

@@ -12,6 +12,7 @@
 #define __AUDACITY_CUSTOM_UPDATER__
 
 #include "Ruler.h"
+#include "Updater.h"
 
 struct Ruler::CustomUpdater : public Ruler::Updater {
    explicit CustomUpdater(const Ruler& ruler, const ZoomInfo* z)
