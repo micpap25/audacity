@@ -24,6 +24,13 @@ class Envelope;
 class ZoomInfo;
 
 class AUDACITY_DLL_API Ruler {
+private:
+
+   struct Updater;
+   struct LinearUpdater;
+   struct LogarithmicUpdater;
+   struct CustomUpdater;
+
  public:
 
    enum RulerFormat {
@@ -61,6 +68,10 @@ class AUDACITY_DLL_API Ruler {
    // hiddenMin, hiddenMax are the values that would be shown without the fisheye.
    // (at the center of the pixel, in both cases)
    void SetRange(double min, double max, double hiddenMin, double hiddenMax);
+
+   // Set the kind of updater the ruler will use
+   // (Linear, Logarithmic, Custom, etc.)
+   void SetUpdater(std::unique_ptr<Updater> pUpdater);
 
    //
    // Optional Ruler Parameters
@@ -170,11 +181,6 @@ class AUDACITY_DLL_API Ruler {
    void ChooseFonts( wxDC &dc ) const;
 
    void UpdateCache( wxDC &dc, const Envelope* envelope ) const;
-
-   struct Updater;
-   struct LinearUpdater;
-   struct LogarithmicUpdater;
-   struct CustomUpdater;
    
 public:
    bool mbTicksOnly; // true => no line the length of the ruler
@@ -189,6 +195,8 @@ private:
 
    std::unique_ptr<Fonts> mpUserFonts;
    mutable std::unique_ptr<Fonts> mpFonts;
+
+   std::unique_ptr<Updater> mpUpdater;
 
    double       mMin, mMax;
    double       mHiddenMin, mHiddenMax;
