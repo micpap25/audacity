@@ -73,6 +73,9 @@ private:
    // (Linear, Logarithmic, Custom, etc.)
    void SetUpdater(std::unique_ptr<Updater> pUpdater);
 
+   // An overload to replace SetUseZoomInfo
+   void SetUpdater(std::unique_ptr<Updater> pUpdater, int leftOffset, const ZoomInfo* zoomInfo);
+
    //
    // Optional Ruler Parameters
    //

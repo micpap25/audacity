@@ -154,6 +154,23 @@ void Ruler::SetUpdater(std::unique_ptr<Updater> pUpdater)
    Invalidate();
 }
 
+void Ruler::SetUpdater
+   (std::unique_ptr<Updater> pUpdater, int leftOffset, const ZoomInfo* zoomInfo)
+{
+   // Should a comparison be made between mpUpdater and pUpdater?
+   // Runtime type comparison isn't clean in c++
+   mpUpdater = std::move(pUpdater);
+
+   if (mLeftOffset != leftOffset)
+      mLeftOffset = leftOffset;
+
+   // Hm, is this invalidation sufficient?  What if *zoomInfo changes under us?
+   if (mUseZoomInfo != zoomInfo)
+      mUseZoomInfo = zoomInfo;
+
+   Invalidate();
+}
+
 void Ruler::SetLog(bool log)
 {
    // Logarithmic
