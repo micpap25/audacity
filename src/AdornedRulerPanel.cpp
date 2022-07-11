@@ -1282,7 +1282,7 @@ AdornedRulerPanel::AdornedRulerPanel(AudacityProject* project,
 
    mOuter = GetClientRect();
 
-   mRuler.SetUpdater( std::make_unique<LinearUpdater>( mRuler, mViewInfo ), mLeftOffset );
+   // mRuler.SetUpdater( std::make_unique<LinearUpdater>( mRuler, mViewInfo ), mLeftOffset );
    mRuler.SetLabelEdges( false );
    mRuler.SetFormat( Ruler::TimeFormat );
 
@@ -2579,7 +2579,7 @@ int AdornedRulerPanel::GetRulerHeight(bool showScrubBar)
 void AdornedRulerPanel::SetLeftOffset(int offset)
 {
    mLeftOffset = offset;
-   mRuler.SetUpdater( std::make_unique<LinearUpdater>( mRuler, mViewInfo ), offset );
+   // mRuler.SetUpdater( std::make_unique<LinearUpdater>( mRuler, mViewInfo ), offset );
 }
 
 // Draws the scrubbing/seeking indicator.
