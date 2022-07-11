@@ -68,7 +68,7 @@ class AUDACITY_DLL_API Ruler {
    void SetUpdater(std::unique_ptr<Updater> pUpdater);
 
    // An overload to replace SetUseZoomInfo
-   void SetUpdater(std::unique_ptr<Updater> pUpdater, int leftOffset, const ZoomInfo* zoomInfo);
+   void SetUpdater(std::unique_ptr<Updater> pUpdater, int leftOffset);
 
    //
    // Optional Ruler Parameters
@@ -137,8 +137,6 @@ class AUDACITY_DLL_API Ruler {
       const TranslatableStrings &labels, int start, int step);
    void SetCustomMinorLabels(
       const TranslatableStrings &labels, int start, int step);
-
-   void SetUseZoomInfo(int leftOffset, const ZoomInfo *zoomInfo);
 
    //
    // Drawing

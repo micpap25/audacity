@@ -33,7 +33,7 @@ void LinearUpdater::Update(
          return -1;
 
       int mid;
-      if (zoomInfo != NULL) {
+      if (zoomInfo) {
          // Tick only at zero
          if (value)
             return -1;
@@ -91,7 +91,7 @@ void LinearUpdater::Update(
       double d, warpedD, nextD;
 
       double prevTime = 0.0, time = 0.0;
-      if (zoomInfo != NULL) {
+      if (zoomInfo) {
          j = zoomInfo->TimeToPosition(mMin);
          prevTime = zoomInfo->PositionToTime(--j);
          time = zoomInfo->PositionToTime(++j);

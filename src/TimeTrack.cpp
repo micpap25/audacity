@@ -27,6 +27,7 @@
 #include "Project.h"
 #include "ProjectRate.h"
 #include "ViewInfo.h"
+#include "widgets/LinearUpdater.h"
 
 
 //TODO-MB: are these sensible values?
@@ -74,7 +75,10 @@ void TimeTrack::CleanState()
    SetName(GetDefaultName());
 
    mRuler = std::make_unique<Ruler>();
-   mRuler->SetUseZoomInfo(0, mZoomInfo);
+
+   mRuler->SetUpdater
+   (std::make_unique<LinearUpdater>(mRuler, mZoomInfo),
+      0);
    mRuler->SetLabelEdges(false);
    mRuler->SetFormat(Ruler::TimeFormat);
 }
@@ -102,7 +106,9 @@ TimeTrack::TimeTrack(const TimeTrack &orig, ProtectedCreationArg &&a,
 
    ///@TODO: Give Ruler:: a copy-constructor instead of this?
    mRuler = std::make_unique<Ruler>();
-   mRuler->SetUseZoomInfo(0, mZoomInfo);
+   mRuler->SetUpdater
+   (std::make_unique<LinearUpdater>(mRuler, mZoomInfo),
+      0);
    mRuler->SetLabelEdges(false);
    mRuler->SetFormat(Ruler::TimeFormat);
 }

@@ -155,7 +155,7 @@ void Ruler::SetUpdater(std::unique_ptr<Updater> pUpdater)
 }
 
 void Ruler::SetUpdater
-   (std::unique_ptr<Updater> pUpdater, int leftOffset, const ZoomInfo* zoomInfo)
+   (std::unique_ptr<Updater> pUpdater, int leftOffset)
 {
    // Should a comparison be made between mpUpdater and pUpdater?
    // Runtime type comparison isn't clean in c++
@@ -165,8 +165,8 @@ void Ruler::SetUpdater
       mLeftOffset = leftOffset;
 
    // Hm, is this invalidation sufficient?  What if *zoomInfo changes under us?
-   if (mUseZoomInfo != zoomInfo)
-      mUseZoomInfo = zoomInfo;
+   if (mUseZoomInfo != mpUpdater->zoomInfo)
+      mUseZoomInfo = mpUpdater->zoomInfo;
 
    Invalidate();
 }
@@ -857,19 +857,6 @@ void Ruler::Label::Draw(wxDC&dc, bool twoTone, wxColour c) const
 #endif
       dc.SetBackgroundMode(wxTRANSPARENT);
       dc.DrawText(text.Translation(), lx, ly);
-   }
-}
-
-void Ruler::SetUseZoomInfo(int leftOffset, const ZoomInfo *zoomInfo)
-{
-   
-   if ( mLeftOffset != leftOffset ||
-      // Hm, is this invalidation sufficient?  What if *zoomInfo changes under us?
-      mUseZoomInfo != zoomInfo
-   ) {
-      mLeftOffset = leftOffset;
-      mUseZoomInfo = zoomInfo;
-      Invalidate();
    }
 }
 
