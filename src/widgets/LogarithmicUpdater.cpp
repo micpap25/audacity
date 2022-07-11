@@ -106,6 +106,3 @@ void LogarithmicUpdater::Update(
 
    BoxAdjust(allOutputs);
 }
-
-
-#endif

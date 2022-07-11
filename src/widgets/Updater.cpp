@@ -533,3 +533,9 @@ bool Updater::TickCustom(wxDC& dc, int labelIdx, wxFont font,
    outputs.labels[labelIdx] = (result.second);
    return !rect.IsEmpty();
 }
+
+// Theoretically this helps
+void Updater::Update(
+   wxDC& dc, const Envelope* envelope,
+   UpdateOutputs& allOutputs
+) const {}

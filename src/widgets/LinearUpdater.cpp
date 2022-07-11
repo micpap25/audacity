@@ -158,6 +158,3 @@ void LinearUpdater::Update(
 
    BoxAdjust(allOutputs);
 }
-
-#endif
-
