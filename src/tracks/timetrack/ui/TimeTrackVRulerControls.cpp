@@ -122,10 +122,10 @@ void TimeTrackVRulerControls::UpdateRuler( const wxRect &rect )
    vruler->SetFormat((tt->GetDisplayLog()) ? Ruler::RealLogFormat : Ruler::RealFormat);
    vruler->SetUnits({});
    vruler->SetLabelEdges(false);
-   // if (tt->GetDisplayLog())
-      // vruler->SetUpdater(std::make_unique<LogarithmicUpdater>(vruler, NULL));
-   // else
-      // vruler->SetUpdater(std::make_unique<LinearUpdater>(vruler, NULL));
+   if (tt->GetDisplayLog())
+      vruler->SetUpdater(std::make_unique<LogarithmicUpdater>(*vruler, nullptr));
+   else
+      vruler->SetUpdater(std::make_unique<LinearUpdater>(*vruler, nullptr));
 
    vruler->GetMaxSize( &tt->vrulerSize.first, &tt->vrulerSize.second );
 }

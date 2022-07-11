@@ -123,8 +123,11 @@ Ruler::Ruler()
 
    mUseZoomInfo = NULL;
 
+   // This part in particular needs inspection, not giving an error
+   // But is this corret? And should it be set to NULL or nullptr if a default
+   // cannot be made?
    // mpUpdater = std::make_unique<LinearUpdater>( *this, mUseZoomInfo );
-   mpUpdater = NULL;
+   mpUpdater = nullptr;
 }
 
 Ruler::~Ruler()
@@ -877,10 +880,10 @@ RulerPanel::RulerPanel(wxWindow* parent, wxWindowID id,
    ruler.SetBounds( 0, 0, bounds.x, bounds.y );
    ruler.SetOrientation(orientation);
    ruler.SetRange( range.first, range.second );
-   // if (options.log)
-      // ruler.SetUpdater(std::make_unique<LogarithmicUpdater>(ruler, NULL));
-   // else
-      // ruler.SetUpdater(std::make_unique<LinearUpdater>(ruler, NULL));
+   if (options.log)
+      ruler.SetUpdater(std::make_unique<LogarithmicUpdater>(ruler, nullptr));
+   else
+      ruler.SetUpdater(std::make_unique<LinearUpdater>(ruler, nullptr));
    ruler.SetFormat(format);
    ruler.SetUnits( units );
    ruler.SetFlip( options.flip );

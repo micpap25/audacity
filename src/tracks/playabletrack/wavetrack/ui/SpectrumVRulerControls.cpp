@@ -169,7 +169,7 @@ void SpectrumVRulerControls::DoUpdateVRuler(
             vruler->SetRange((int)(maxFreq), (int)(minFreq));
             vruler->SetUnits({});
          }
-         // vruler->SetUpdater(std::make_unique<LinearUpdater>(vruler, NULL));
+         vruler->SetUpdater(std::make_unique<LinearUpdater>(*vruler, nullptr));
       }
          break;
       case SpectrogramSettings::stLogarithmic:
@@ -191,7 +191,7 @@ void SpectrumVRulerControls::DoUpdateVRuler(
          vruler->SetLabelEdges(true);
          vruler->SetRange(maxFreq, minFreq);
          vruler->SetUnits({});
-         // vruler->SetUpdater(std::make_unique<LogarithmicUpdater>(vruler, NULL));
+         vruler->SetUpdater(std::make_unique<LogarithmicUpdater>(*vruler, nullptr));
          NumberScale scale(
             wt->GetSpectrogramSettings().GetScale( minFreq, maxFreq )
                .Reversal() );
