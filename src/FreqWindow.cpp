@@ -676,10 +676,10 @@ void FrequencyPlotDialog::DrawPlot()
    if (!mData || mDataLen < mWindowSize || mAnalyst->GetProcessedSize() == 0) {
       wxMemoryDC memDC;
 
-      // vRuler->SetUpdater(std::make_unique<LinearUpdater>(vRuler.get(), NULL));
+      // vRuler->ruler.SetUpdater(std::make_unique<LinearUpdater>(vRuler->ruler, NULL));
       vRuler->ruler.SetRange(0.0, -dBRange);
 
-      // hRuler->SetUpdater(std::make_unique<LinearUpdater>(hRuler.get(), NULL));
+      // hRuler->ruler.SetUpdater(std::make_unique<LinearUpdater>(hRuler->ruler, NULL));
       hRuler->ruler.SetRange(0, 1);
 
       DrawBackground(memDC);
@@ -754,19 +754,19 @@ void FrequencyPlotDialog::DrawPlot()
       if (mLogAxis)
       {
          xStep = pow(2.0f, (log(xRatio) / log(2.0f)) / width);
-         // hRuler->SetUpdater(std::make_unique<LogarithmicUpdater>(hRuler.get(), NULL));
+         // hRuler->ruler.SetUpdater(std::make_unique<LogarithmicUpdater>(hRuler->ruler, NULL));
       }
       else
       {
          xStep = (xMax - xMin) / width;
-         // hRuler->SetUpdater(std::make_unique<LinearUpdater>(hRuler.get(), NULL));
+         // hRuler->ruler.SetUpdater(std::make_unique<LinearUpdater>(hRuler->ruler, NULL));
       }
       hRuler->ruler.SetUnits(XO("Hz"));
    } else {
       xMin = 0;
       xMax = mAnalyst->GetProcessedSize() / mRate;
       xStep = (xMax - xMin) / width;
-      // hRuler->SetUpdater(std::make_unique<LinearUpdater>(hRuler.get(), NULL));
+      // hRuler->ruler.SetUpdater(std::make_unique<LinearUpdater>(hRuler->ruler, NULL));
       /* i18n-hint: short form of 'seconds'.*/
       hRuler->ruler.SetUnits(XO("s"));
    }

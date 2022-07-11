@@ -2290,7 +2290,7 @@ void EffectEqualization::UpdateDraw()
    {
       EnvLogToLin();
       mEnvelope = mLinEnvelope.get();
-      // mFreqRuler->SetUpdater(std::make_unique<LinearUpdater>(mFreqRuler.get(), NULL));
+      // mFreqRuler->ruler.SetUpdater(std::make_unique<LinearUpdater>(mFreqRuler->ruler, NULL));
       mFreqRuler->ruler.SetRange(0, mHiFreq);
    }
 
@@ -2322,7 +2322,7 @@ void EffectEqualization::UpdateGraphic()
 
       EnvLinToLog();
       mEnvelope = mLogEnvelope.get();
-      // mFreqRuler->SetUpdater(std::make_unique<LogarithmicUpdater>(mFreqRuler.get(), NULL));
+      // mFreqRuler->ruler.SetUpdater(std::make_unique<LogarithmicUpdater>(mFreqRuler->ruler, NULL));
       mFreqRuler->ruler.SetRange(mLoFreq, mHiFreq);
    }
 
@@ -2911,7 +2911,7 @@ void EffectEqualization::OnLinFreq(wxCommandEvent & WXUNUSED(event))
    mLin = mLinFreq->IsChecked();
    if(IsLinear())  //going from log to lin freq scale
    {
-      // mFreqRuler->SetUpdater(std::make_unique<LinearUpdater>(mFreqRuler.get(), NULL));
+      // mFreqRuler->ruler.SetUpdater(std::make_unique<LinearUpdater>(mFreqRuler->ruler, NULL));
       mFreqRuler->ruler.SetRange(0, mHiFreq);
       EnvLogToLin();
       mEnvelope = mLinEnvelope.get();
@@ -2919,7 +2919,7 @@ void EffectEqualization::OnLinFreq(wxCommandEvent & WXUNUSED(event))
    }
    else  //going from lin to log freq scale
    {
-      // mFreqRuler->SetUpdater(std::make_unique<LogarithmicUpdater>(mFreqRuler.get(), NULL));
+      // mFreqRuler->ruler.SetUpdater(std::make_unique<LogarithmicUpdater>(mFreqRuler->ruler, NULL));
       mFreqRuler->ruler.SetRange(mLoFreq, mHiFreq);
       EnvLinToLog();
       mEnvelope = mLogEnvelope.get();
