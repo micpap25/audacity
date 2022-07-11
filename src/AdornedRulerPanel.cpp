@@ -55,6 +55,8 @@
 #include "widgets/AButton.h"
 #include "widgets/AudacityMessageBox.h"
 #include "widgets/Grabber.h"
+#include "widgets/LinearUpdater.h"
+#include "widgets/LogarithmicUpdater.h"
 #include "widgets/wxWidgetsWindowPlacement.h"
 
 #include <wx/dcclient.h>

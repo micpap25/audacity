@@ -13,7 +13,15 @@
 
 #include "Ruler.h"
 
-struct Ruler::Updater {
+class Ruler::Label;
+
+struct Updater {
+private:
+   using Labels = std::vector<Ruler::Label>;
+   using Bits = std::vector< bool >;
+
+public:
+
    const Ruler& mRuler;
    const ZoomInfo* zoomInfo;
 
@@ -21,10 +29,11 @@ struct Ruler::Updater {
       : mRuler{ ruler }
       , zoomInfo{ z }
    {}
+   ~Updater() {}
 
    const double mDbMirrorValue = mRuler.mDbMirrorValue;
    const int mLength = mRuler.mLength;
-   const RulerFormat mFormat = mRuler.mFormat;
+   const Ruler::RulerFormat mFormat = mRuler.mFormat;
    const TranslatableString mUnits = mRuler.mUnits;
 
    const int mLeft = mRuler.mLeft;
@@ -37,7 +46,7 @@ struct Ruler::Updater {
    const bool mFlip = mRuler.mFlip;
 
    const bool mCustom = mRuler.mCustom;
-   const Fonts& mFonts = *mRuler.mpFonts;
+   const Ruler::Fonts& mFonts = *mRuler.mpFonts;
    const bool mLog = mRuler.mLog;
    const double mHiddenMin = mRuler.mHiddenMin;
    const double mHiddenMax = mRuler.mHiddenMax;
@@ -46,6 +55,17 @@ struct Ruler::Updater {
    const double mMax = mRuler.mMax;
    const int mLeftOffset = mRuler.mLeftOffset;
    const NumberScale mNumberScale = mRuler.mNumberScale;
+
+
+
+   struct TickOutputs { Labels& labels; Bits& bits; wxRect& box; };
+   struct UpdateOutputs {
+      Labels& majorLabels, & minorLabels, & minorMinorLabels;
+      Bits& bits;
+      wxRect& box;
+   };
+
+   struct TickSizes;
 
    bool Tick(wxDC& dc,
       int pos, double d, const TickSizes& tickSizes, wxFont font,

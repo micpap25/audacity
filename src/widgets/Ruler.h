@@ -22,15 +22,9 @@ class wxFont;
 
 class Envelope;
 class ZoomInfo;
+struct Updater;
 
 class AUDACITY_DLL_API Ruler {
-private:
-
-   struct Updater;
-   struct LinearUpdater;
-   struct LogarithmicUpdater;
-   struct CustomUpdater;
-
  public:
 
    enum RulerFormat {
@@ -166,9 +160,10 @@ private:
    void Invalidate();
 
  private:
-   struct TickOutputs;
-   struct UpdateOutputs;
-   struct TickSizes;
+   friend class Updater;
+   friend class LinearUpdater;
+   friend class LogarithmicUpdater;
+   friend class CustomUpdater;
 
    class Label {
     public:
