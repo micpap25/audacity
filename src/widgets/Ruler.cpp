@@ -68,6 +68,8 @@ array of Ruler::Label.
 #include "ViewInfo.h"
 
 #include "Updater.h"
+// Need to include to set default
+// #include "LinearUpdater.h"
 
 using std::min;
 using std::max;
@@ -119,8 +121,6 @@ Ruler::Ruler()
 
    mUseZoomInfo = NULL;
 
-   // Default the updater to Linear, as it would be before removal of mLog
-   // struct LinearUpdater;
    // mpUpdater = std::make_unique<LinearUpdater>( *this, mUseZoomInfo );
    mpUpdater = NULL;
 }
