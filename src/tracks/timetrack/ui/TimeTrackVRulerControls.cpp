@@ -123,9 +123,9 @@ void TimeTrackVRulerControls::UpdateRuler( const wxRect &rect )
    vruler->SetUnits({});
    vruler->SetLabelEdges(false);
    // if (tt->GetDisplayLog())
-      // vruler->SetUpdater(std::make_unique<LogarithmicUpdater>(vruler.get(), NULL));
+      // vruler->SetUpdater(std::make_unique<LogarithmicUpdater>(vruler, NULL));
    // else
-      // vruler->SetUpdater(std::make_unique<LinearUpdater>(vruler.get(), NULL));
+      // vruler->SetUpdater(std::make_unique<LinearUpdater>(vruler, NULL));
 
    vruler->GetMaxSize( &tt->vrulerSize.first, &tt->vrulerSize.second );
 }
