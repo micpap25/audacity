@@ -69,7 +69,9 @@ array of Ruler::Label.
 
 #include "Updater.h"
 // Need to include to set default
-// #include "LinearUpdater.h"
+#include "LinearUpdater.h"
+// Needed for RulerPanel
+#include "LogarithmicUpdater.h"
 
 using std::min;
 using std::max;
@@ -169,17 +171,6 @@ void Ruler::SetUpdater
       mUseZoomInfo = mpUpdater->zoomInfo;
 
    Invalidate();
-}
-
-void Ruler::SetLog(bool log)
-{
-   // Logarithmic
-
-   if (mLog != log) {
-      mLog = log;
-
-      Invalidate();
-   }
 }
 
 void Ruler::SetUnits(const TranslatableString &units)
@@ -886,7 +877,10 @@ RulerPanel::RulerPanel(wxWindow* parent, wxWindowID id,
    ruler.SetBounds( 0, 0, bounds.x, bounds.y );
    ruler.SetOrientation(orientation);
    ruler.SetRange( range.first, range.second );
-   ruler.SetLog( options.log );
+   // if (options.log)
+      // ruler->SetUpdater(std::make_unique<LogarithmicUpdater>(ruler.get(), NULL));
+   // else
+      // ruler->SetUpdater(std::make_unique<LinearUpdater>(ruler.get(), NULL));
    ruler.SetFormat(format);
    ruler.SetUnits( units );
    ruler.SetFlip( options.flip );

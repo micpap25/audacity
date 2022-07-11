@@ -85,9 +85,6 @@ class AUDACITY_DLL_API Ruler {
    void SetUnits(const TranslatableString &units);
    void SetDbMirrorValue( const double d );
 
-   // Logarithmic
-   void SetLog(bool log);
-
    // Minimum number of pixels between labels
    void SetSpacing(int spacing);
 
