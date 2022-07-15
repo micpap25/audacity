@@ -16,6 +16,25 @@ void LinearUpdater::Update(
    TickOutputs majorOutputs{
       allOutputs.majorLabels, allOutputs.bits, allOutputs.box };
 
+   const double mDbMirrorValue = mRuler.mDbMirrorValue;
+   const int mLength = mRuler.mLength;
+   const Ruler::RulerFormat mFormat = mRuler.mFormat;
+
+   const int mLeft = mRuler.mLeft;
+   const int mTop = mRuler.mTop;
+   const int mBottom = mRuler.mBottom;
+   const int mRight = mRuler.mRight;
+   const int mOrientation = mRuler.mOrientation;
+
+   const double mMin = mRuler.mMin;
+   const double mMax = mRuler.mMax;
+   const double mHiddenMin = mRuler.mHiddenMin;
+   const double mHiddenMax = mRuler.mHiddenMax;
+
+   const Ruler::Fonts& mFonts = *mRuler.mpFonts;
+   const bool mLabelEdges = mRuler.mLabelEdges;
+   const int mLeftOffset = mRuler.mLeftOffset;
+
    // Use the "hidden" min and max to determine the tick size.
    // That may make a difference with fisheye.
    // Otherwise you may see the tick size for the whole ruler change
@@ -24,7 +43,8 @@ void LinearUpdater::Update(
    TickSizes tickSizes{ UPP, mOrientation, mFormat, false };
 
    auto TickAtValue =
-      [this, &tickSizes, &dc, &majorOutputs]
+      [this, &tickSizes, &dc, &majorOutputs, &mFonts, mOrientation,
+         mMin, mMax, mLength, mLeftOffset, mRight, mBottom]
    (double value) -> int {
       // Make a tick only if the value is strictly between the bounds
       if (value <= std::min(mMin, mMax))

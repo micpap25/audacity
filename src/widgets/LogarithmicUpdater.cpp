@@ -16,6 +16,19 @@ void LogarithmicUpdater::Update(
    TickOutputs majorOutputs{
       allOutputs.majorLabels, allOutputs.bits, allOutputs.box };
 
+   const int mLength = mRuler.mLength;
+   const Ruler::RulerFormat mFormat = mRuler.mFormat;
+
+   const int mOrientation = mRuler.mOrientation;
+
+   const double mMin = mRuler.mMin;
+   const double mMax = mRuler.mMax;
+   const double mHiddenMin = mRuler.mHiddenMin;
+   const double mHiddenMax = mRuler.mHiddenMax;
+
+   const Ruler::Fonts& mFonts = *mRuler.mpFonts;
+   const NumberScale mNumberScale = mRuler.mNumberScale;
+
    auto numberScale = (mNumberScale == NumberScale{})
       ? NumberScale(nstLogarithmic, mMin, mMax)
       : mNumberScale;
@@ -89,7 +102,7 @@ void LogarithmicUpdater::Update(
       allOutputs.minorMinorLabels, allOutputs.bits, allOutputs.box };
    for (int i = 0; i <= steps; i++) {
       // PRL:  Bug1038.  Don't label 1.6, rounded, as a duplicate tick for "2"
-      if (!(mFormat == IntFormat && decade < 10.0)) {
+      if (!(mFormat == Ruler::IntFormat && decade < 10.0)) {
          for (int f = start; f != (int)(end); f += mstep) {
             if ((int)(f / 10) != f / 10.0f) {
                val = decade * f / 10;

@@ -21,24 +21,7 @@
 
 #include "Updater.h"
 
-
-struct TickOutputs { Labels& labels; Bits& bits; wxRect& box; };
-struct UpdateOutputs {
-   Labels& majorLabels, & minorLabels, & minorMinorLabels;
-   Bits& bits;
-   wxRect& box;
-};
-
-struct TickSizes
-{
-   bool useMajor = true;
-
-   double       mMajor;
-   double       mMinor;
-
-   int          mDigits;
-
-   TickSizes(double UPP, int orientation, RulerFormat format, bool log)
+Updater::TickSizes::TickSizes(double UPP, int orientation, Ruler::RulerFormat format, bool log)
    {
       //TODO: better dynamic digit computation for the log case
       (void)log;
@@ -63,7 +46,7 @@ struct TickSizes
       mDigits = 0;
 
       switch (format) {
-      case LinearDBFormat:
+      case Ruler::LinearDBFormat:
          if (units < 0.001) {
             mMinor = 0.001;
             mMajor = 0.005;
@@ -121,7 +104,7 @@ struct TickSizes
          }
          break;
 
-      case IntFormat:
+      case Ruler::IntFormat:
          d = 1.0;
          for (;;) {
             if (units < d) {
@@ -139,7 +122,7 @@ struct TickSizes
          }
          break;
 
-      case TimeFormat:
+      case Ruler::TimeFormat:
          if (units > 0.5) {
             if (units < 1.0) { // 1 sec
                mMinor = 1.0;
@@ -215,7 +198,7 @@ struct TickSizes
          // (fractions of a second should be dealt with
          // the same way as for RealFormat)
 
-      case RealFormat:
+      case Ruler::RealFormat:
          d = 0.000001;
          // mDigits is number of digits after the decimal point.
          mDigits = 6;
@@ -243,7 +226,7 @@ struct TickSizes
          mMajor = d * 2.0;
          break;
 
-      case RealLogFormat:
+      case Ruler::RealLogFormat:
          d = 0.000001;
          // mDigits is number of digits after the decimal point.
          mDigits = 6;
@@ -274,8 +257,8 @@ struct TickSizes
       }
    }
 
-   TranslatableString LabelString(
-      double d, RulerFormat format, const TranslatableString& units)
+TranslatableString Updater::TickSizes::LabelString(
+      double d, Ruler::RulerFormat format, const TranslatableString& units)
       const
    {
       // Given a value, turn it into a string according
@@ -289,14 +272,14 @@ struct TickSizes
       // hour-minute-second, etc.?)
 
       // Replace -0 with 0
-      if (d < 0.0 && (d + mMinor > 0.0) && (format != RealLogFormat))
+      if (d < 0.0 && (d + mMinor > 0.0) && (format != Ruler::RealLogFormat))
          d = 0.0;
 
       switch (format) {
-      case IntFormat:
+      case Ruler::IntFormat:
          s.Printf(wxT("%d"), (int)floor(d + 0.5));
          break;
-      case LinearDBFormat:
+      case Ruler::LinearDBFormat:
          if (mMinor >= 1.0)
             s.Printf(wxT("%d"), (int)floor(d + 0.5));
          else {
@@ -304,21 +287,21 @@ struct TickSizes
             s.Printf(wxT("%.*f"), precision, d);
          }
          break;
-      case RealFormat:
+      case Ruler::RealFormat:
          if (mMinor >= 1.0)
             s.Printf(wxT("%d"), (int)floor(d + 0.5));
          else {
             s.Printf(wxString::Format(wxT("%%.%df"), mDigits), d);
          }
          break;
-      case RealLogFormat:
+      case Ruler::RealLogFormat:
          if (mMinor >= 1.0)
             s.Printf(wxT("%d"), (int)floor(d + 0.5));
          else {
             s.Printf(wxString::Format(wxT("%%.%df"), mDigits), d);
          }
          break;
-      case TimeFormat:
+      case Ruler::TimeFormat:
          if (useMajor) {
             if (d < 0) {
                s = wxT("-");
@@ -426,15 +409,20 @@ struct TickSizes
          result += units;
 
       return result;
-   }
-
-}; // struct Ruler::TickSizes
+ }
 
 void Updater::BoxAdjust(
    UpdateOutputs& allOutputs
 )
 const
 {
+   const int mLeft = mRuler.mLeft;
+   const int mTop = mRuler.mTop;
+   const int mBottom = mRuler.mBottom;
+   const int mRight = mRuler.mRight;
+   const int mOrientation = mRuler.mOrientation;
+   const bool mFlip = mRuler.mFlip;
+
    int displacementx = 0, displacementy = 0;
    auto& box = allOutputs.box;
    if (!mFlip) {
@@ -460,7 +448,7 @@ const
          displacementy = 0;
       }
    }
-   auto update = [=](Label& label) {
+   auto update = [=](Ruler::Label& label) {
       label.lx += displacementx;
       label.ly += displacementy;
    };
@@ -477,6 +465,21 @@ bool Updater::Tick(wxDC& dc,
    // in/out:
    TickOutputs outputs) const
 {
+   const double mDbMirrorValue = mRuler.mDbMirrorValue;
+   const int mLength = mRuler.mLength;
+   const Ruler::RulerFormat mFormat = mRuler.mFormat;
+
+   const int mLeft = mRuler.mLeft;
+   const int mTop = mRuler.mTop;
+   const int mBottom = mRuler.mBottom;
+   const int mRight = mRuler.mRight;
+   const int mOrientation = mRuler.mOrientation;
+
+   const Ruler::Fonts& mFonts = *mRuler.mpFonts;
+   const TranslatableString mUnits = mRuler.mUnits;
+   const int mSpacing = mRuler.mSpacing;
+   const bool mFlip = mRuler.mFlip;
+
    // Bug 521.  dB view for waveforms needs a 2-sided scale.
    if ((mDbMirrorValue > 1.0) && (-d > mDbMirrorValue))
       d = -2 * mDbMirrorValue - d;
@@ -486,12 +489,12 @@ bool Updater::Tick(wxDC& dc,
    if (outputs.labels.size() >= mLength)
       return false;
 
-   Label lab;
+   Ruler::Label lab;
    lab.value = d;
    lab.pos = pos;
    lab.text = tickSizes.LabelString(d, mFormat, mUnits);
 
-   const auto result = MakeTick(
+   const auto result = Ruler::MakeTick(
       lab,
       dc, font,
       outputs.bits,
@@ -509,6 +512,14 @@ bool Updater::TickCustom(wxDC& dc, int labelIdx, wxFont font,
    // in/out:
    TickOutputs outputs) const
 {
+   const int mLeft = mRuler.mLeft;
+   const int mTop = mRuler.mTop;
+   const int mOrientation = mRuler.mOrientation;
+
+   const Ruler::Fonts& mFonts = *mRuler.mpFonts;
+   const int mSpacing = mRuler.mSpacing;
+   const bool mFlip = mRuler.mFlip;
+
    // FIXME: We don't draw a tick if of end of our label arrays
    // But we shouldn't have an array of labels.
    if (labelIdx >= outputs.labels.size())
@@ -516,10 +527,10 @@ bool Updater::TickCustom(wxDC& dc, int labelIdx, wxFont font,
 
    //This should only used in the mCustom case
 
-   Label lab;
+   Ruler::Label lab;
    lab.value = 0.0;
 
-   const auto result = MakeTick(
+   const auto result = Ruler::MakeTick(
       lab,
 
       dc, font,

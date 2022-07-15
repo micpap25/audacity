@@ -12,16 +12,9 @@
 #define __AUDACITY_UPDATER__
 
 #include "Ruler.h"
-
-class Ruler::Label;
+#include "ViewInfo.h" // for children
 
 struct Updater {
-private:
-   using Labels = std::vector<Ruler::Label>;
-   using Bits = std::vector< bool >;
-
-public:
-
    const Ruler& mRuler;
    const ZoomInfo* zoomInfo;
 
@@ -31,41 +24,39 @@ public:
    {}
    ~Updater() {}
 
-   const double mDbMirrorValue = mRuler.mDbMirrorValue;
-   const int mLength = mRuler.mLength;
-   const Ruler::RulerFormat mFormat = mRuler.mFormat;
-   const TranslatableString mUnits = mRuler.mUnits;
-
-   const int mLeft = mRuler.mLeft;
-   const int mTop = mRuler.mTop;
-   const int mBottom = mRuler.mBottom;
-   const int mRight = mRuler.mRight;
-
-   const int mSpacing = mRuler.mSpacing;
-   const int mOrientation = mRuler.mOrientation;
-   const bool mFlip = mRuler.mFlip;
-
-   const bool mCustom = mRuler.mCustom;
-   const Ruler::Fonts& mFonts = *mRuler.mpFonts;
-   const bool mLog = mRuler.mLog;
-   const double mHiddenMin = mRuler.mHiddenMin;
-   const double mHiddenMax = mRuler.mHiddenMax;
-   const bool mLabelEdges = mRuler.mLabelEdges;
-   const double mMin = mRuler.mMin;
-   const double mMax = mRuler.mMax;
-   const int mLeftOffset = mRuler.mLeftOffset;
-   const NumberScale mNumberScale = mRuler.mNumberScale;
-
-
-
-   struct TickOutputs { Labels& labels; Bits& bits; wxRect& box; };
+   struct TickOutputs { Ruler::Labels& labels; Ruler::Bits& bits; wxRect& box; };
    struct UpdateOutputs {
-      Labels& majorLabels, & minorLabels, & minorMinorLabels;
-      Bits& bits;
+      Ruler::Labels& majorLabels, & minorLabels, & minorMinorLabels;
+      Ruler::Bits& bits;
       wxRect& box;
    };
 
-   struct TickSizes;
+
+   struct TickSizes
+   {
+      bool useMajor = true;
+
+      double       mMajor;
+      double       mMinor;
+
+      int          mDigits;
+
+      TickSizes(double UPP, int orientation, Ruler::RulerFormat format, bool log);
+
+      TranslatableString LabelString(
+         double d, Ruler::RulerFormat format, const TranslatableString& units)
+         const;
+   };
+
+   double ComputeWarpedLength(const Envelope& env, double t0, double t1) const
+   {
+      return env.IntegralOfInverse(t0, t1);
+   }
+
+   double SolveWarpedLength(const Envelope& env, double t0, double length) const
+   {
+      return env.SolveIntegralOfInverse(t0, length);
+   }
 
    bool Tick(wxDC& dc,
       int pos, double d, const TickSizes& tickSizes, wxFont font,

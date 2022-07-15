@@ -126,8 +126,8 @@ Ruler::Ruler()
    // This part in particular needs inspection, not giving an error
    // But is this corret? And should it be set to NULL or nullptr if a default
    // cannot be made?
-   // mpUpdater = std::make_unique<LinearUpdater>( *this, mUseZoomInfo );
-   mpUpdater = nullptr;
+   mpUpdater = std::make_unique<LinearUpdater>( *this, mUseZoomInfo );
+   // mpUpdater = nullptr;
 }
 
 Ruler::~Ruler()
@@ -476,18 +476,6 @@ struct Ruler::Cache {
    Labels mMajorLabels, mMinorLabels, mMinorMinorLabels;
    wxRect mRect;
 };
-
-namespace {
-double ComputeWarpedLength(const Envelope &env, double t0, double t1)
-{
-   return env.IntegralOfInverse(t0, t1);
-}
-
-double SolveWarpedLength(const Envelope &env, double t0, double length)
-{
-   return env.SolveIntegralOfInverse(t0, length);
-}
-}
 
 static constexpr int MinPixelHeight =
 #ifdef __WXMSW__

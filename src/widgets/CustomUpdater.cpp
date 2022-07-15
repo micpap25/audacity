@@ -14,6 +14,9 @@
 void CustomUpdater::Update(
    wxDC& dc, const Envelope* envelope, UpdateOutputs& allOutputs) const
 {
+   const int mLength = mRuler.mLength;
+   const Ruler::Fonts& mFonts = *mRuler.mpFonts;
+
    TickOutputs majorOutputs{
       allOutputs.majorLabels, allOutputs.bits, allOutputs.box };
 
