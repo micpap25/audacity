@@ -21,7 +21,7 @@
 #include <wx/checkbox.h>
 #include <wx/stattext.h>
 #include "../ShuttleGui.h"
-#include "../widgets/Ruler.h"
+#include "../widgets/RulerPanel.h"
 #include "../widgets/LinearUpdater.h"
 #include "../widgets/LogarithmicUpdater.h"
 
