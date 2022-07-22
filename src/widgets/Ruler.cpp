@@ -121,27 +121,30 @@ void Ruler::SetFormat(RulerFormat format)
 
 void Ruler::SetUpdater(std::unique_ptr<Updater> pUpdater)
 {
-   // Should a comparison be made between mpUpdater and pUpdater?
-   // Runtime type comparison isn't clean in c++
-   mpUpdater = std::move(pUpdater);
-   Invalidate();
+   bool compare = typeid(pUpdater.get()) != typeid(mpUpdater.get());
+   if (compare)
+   {
+      mpUpdater = std::move(pUpdater);
+      Invalidate();
+   }
 }
 
 void Ruler::SetUpdater
    (std::unique_ptr<Updater> pUpdater, int leftOffset)
 {
-   // Should a comparison be made between mpUpdater and pUpdater?
-   // Runtime type comparison isn't clean in c++
-   mpUpdater = std::move(pUpdater);
+   if (typeid(pUpdater.get()) != typeid(mpUpdater.get()) ||
+      mRulerStruct.mLeftOffset != leftOffset ||
+      mUseZoomInfo != mpUpdater->zoomInfo)
+   {
+      mpUpdater = std::move(pUpdater);
 
-   if (mRulerStruct.mLeftOffset != leftOffset)
       mRulerStruct.mLeftOffset = leftOffset;
 
-   // Hm, is this invalidation sufficient?  What if *zoomInfo changes under us?
-   if (mUseZoomInfo != mpUpdater->zoomInfo)
+      // Hm, is this invalidation sufficient?  What if *zoomInfo changes under us?
       mUseZoomInfo = mpUpdater->zoomInfo;
 
-   Invalidate();
+      Invalidate();
+   }
 }
 
 void Ruler::SetUnits(const TranslatableString &units)
