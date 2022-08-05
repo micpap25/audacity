@@ -1050,6 +1050,8 @@ list( APPEND SOURCES
       >
       widgets/FileHistory.cpp
       widgets/FileHistory.h
+      widgets/GeneratedUpdater.cpp
+      widgets/GeneratedUpdater.h
       widgets/Grabber.cpp
       widgets/Grabber.h
       widgets/Grid.cpp
