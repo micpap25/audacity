@@ -29,6 +29,7 @@
 #include "../ShuttleGui.h"
 
 #include "Decibels.h"
+#include "Beats.h"
 
 #include "ThemePrefs.h"
 #include "AColor.h"
@@ -161,6 +162,14 @@ void GUIPrefs::PopulateOrExchange(ShuttleGui & S)
       }
       S.EndMultiColumn();
 
+      S.StartMultiColumn(2);
+      {
+         S.TieNumericTextBox(XXO("Beats per &minute:"), BeatsPerMinute, 10);
+         S.TieIntegerTextBox(XXO("Upper time &signature:"), UpperTimeSignature, 6);
+         S.TieIntegerTextBox(XXO("Lower time &signature:"), LowerTimeSignature, 6);
+      }
+      S.EndMultiColumn();
+
    }
    S.EndStatic();
 
@@ -238,6 +247,10 @@ bool GUIPrefs::Commit()
       theTheme.DeleteUnusedThemes();
    }
    AColor::ApplyUpdatedImages();
+
+   BeatsPerMinute.Invalidate();
+   UpperTimeSignature.Invalidate();
+   LowerTimeSignature.Invalidate();
 
    return true;
 }

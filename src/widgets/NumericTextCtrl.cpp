@@ -367,6 +367,11 @@ static const TranslatableString BuildBeatsFormat() {
    int uts = UpperTimeSignature.Read();
    int lts = LowerTimeSignature.Read();
 
+   // Check that all data is positive
+   wxASSERT(bpm > 0 && uts > 0 && lts > 0);
+   // Also check that the lower time signature is valid (power of 2)
+   wxASSERT(!(lts & (lts - 1)));
+
    return XO("01000 bars 0%d beats|%f").Format(
       uts, (((double)lts / 4) * bpm) / 60
    );
