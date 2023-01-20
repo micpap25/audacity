@@ -53,8 +53,6 @@
 #include "ZoomInfo.h"
 
 #include "RulerUpdater.h"
-// Need to include to set default
-#include "LinearUpdater.h"
 
 using std::min;
 using std::max;
