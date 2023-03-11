@@ -51,9 +51,10 @@ void BeatsFormat::SetLabelString(
    const int timeSigLower = beatsData ? beatsData->timeSigLower : 0;
 
    double val = (bpm * ((double)timeSigLower / 4) * d) / (60 * timeSigUpper);
-   int beat = round((val - floor(val)) * timeSigUpper);
+   int beat = round((val - floor(val)) * timeSigUpper) + 1;
 
-   if (tickType == RulerFormat::t_major) {
+   // Don't add decimal if it's a major tick or is on the beat
+   if (tickType == RulerFormat::t_major || tickType == RulerFormat::t_minor && beat == 1) {
       s.Printf(wxT("%d"), (int)round(val + 1));
    }
    else if (tickType == RulerFormat::t_minor) {
