@@ -26,7 +26,7 @@ public:
    ) const override;
 
    void SetLabelString(
-      wxString& s, double d, double mMinor, int mDigits, TickType tickType,
+      wxString& s, double d, double units, double mMinor, int mDigits, TickType tickType,
       const std::any& data
    ) const override;
 

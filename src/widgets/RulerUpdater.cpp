@@ -52,7 +52,7 @@ RulerUpdater::TickSizes::TickSizes(
       // minor tick.  We want to show numbers like "-48"
       // in that space.
       // If vertical, we don't need as much space.
-      double units = ((orientation == wxHORIZONTAL) ? 22 : 16) * fabs(UPP);
+      units = ((orientation == wxHORIZONTAL) ? 22 : 16) * fabs(UPP);
 
       mDigits = 0;
 
@@ -63,6 +63,9 @@ TranslatableString RulerUpdater::TickSizes::LabelString(
    double d, const std::unique_ptr<RulerFormat>& format,
    const std::any& data) const
    {
+      // Should not be called unless TickSizes is instantiated
+      wxASSERT(units > 0);
+
       // Given a value, turn it into a string according
       // to the current ruler format.  The number of digits of
       // accuracy depends on the resolution of the ruler,
@@ -77,7 +80,7 @@ TranslatableString RulerUpdater::TickSizes::LabelString(
       if (d < 0.0 && (d + mMinor > 0.0) && (format->Identify() != "RealLogFormat"))
          d = 0.0;
 
-      format->SetLabelString(s, d, mMinor, mDigits, tickType, data);
+      format->SetLabelString(s, d, units, mMinor, mDigits, tickType, data);
 
       auto result = Verbatim(s);
 

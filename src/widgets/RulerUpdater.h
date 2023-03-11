@@ -99,6 +99,7 @@ protected:
       double       mMajor = 0;
       double       mMinor = 0;
       double       mMinorMinor = 0;
+      double       units = 0;
 
       int          mDigits;
 

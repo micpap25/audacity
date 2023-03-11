@@ -29,7 +29,7 @@ public:
    ) const = 0;
 
    virtual void SetLabelString(
-      wxString& s, double d, double mMinor, int mDigits, TickType tickType,
+      wxString& s, double d, double units, double mMinor, int mDigits, TickType tickType,
       const std::any& data
    ) const = 0;
 
