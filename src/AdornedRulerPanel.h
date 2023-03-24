@@ -186,7 +186,6 @@ private:
    void OnPinnedButton(wxCommandEvent & event);
    void OnTogglePinnedState(wxCommandEvent & event);
 
-   bool mBeatsAndMeasures;
    bool mPlayRegionDragsSelection;
    bool mTimelineToolTip;
 
@@ -264,6 +263,22 @@ private:
    bool mLastPlayRegionActive = false;
    double mLastDrawnH{};
    double mLastDrawnZoom{};
+
+public:
+
+   typedef int RulerType;
+   enum RulerTypeValues : int {
+      stMinutesAndSeconds,
+      stBeatsAndMeasures,
+
+      stNumRulerTypes,
+   };
+
+private:
+
+   RulerType mRulerType;
 };
+
+extern TIME_FREQUENCY_SELECTION_API EnumSetting<AdornedRulerPanel::RulerType> RulerPanelViewPreference;
 
 #endif //define __AUDACITY_ADORNED_RULER_PANEL__
