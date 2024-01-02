@@ -21,8 +21,45 @@ Paul Licameli split from WaveTrackVRulerControls.cpp
 #include "../../../../WaveTrack.h"
 #include "../../../../prefs/WaveformSettings.h"
 #include "../../../../widgets/Ruler.h"
+#include "../../../../widgets/LinearUpdater.h"
+#include "../../../../widgets/CustomUpdaterValue.h"
 
 WaveformVRulerControls::~WaveformVRulerControls() = default;
+
+// These are doubles beacuse of the type of value in Label,
+// but for the purpose of labelling the linear dB waveform ruler,
+// these should always be integer numbers.
+using LinearDBValues = std::vector<double>;
+
+static LinearDBValues majorValues{}, minorValues{}, minorMinorValues{};
+
+void RegenerateLinearDBValues(int dBRange)
+{
+   majorValues.clear();
+   minorValues.clear();
+   minorMinorValues.clear();
+
+   majorValues.push_back(0);
+   majorValues.push_back(-dBRange);
+   majorValues.push_back(2 * -dBRange);
+
+   const double EPSILON = .01;
+
+   for (double major = 0.1; major <= 2 + EPSILON; major += .1) {
+      double val = std::round(major * 10) / 10;
+      if (fabs(major - 1) > EPSILON)
+         majorValues.push_back(std::trunc(-dBRange * val));
+   }
+   for (double minor = 0.05; minor <= 1.95 + EPSILON; minor += .1) {
+      double val = std::round(minor * 100) / 100;
+      minorValues.push_back(std::trunc(-dBRange * val));
+   }
+   for (int minorMinor = 0; minorMinor <= 2 * dBRange; minorMinor++) {
+      if ((minorMinor % (int) std::round(dBRange / 20)) != 0) {
+         minorMinorValues.push_back(-minorMinor);
+      }
+   }
+}
 
 std::vector<UIHandlePtr> WaveformVRulerControls::HitTest(
    const TrackPanelMouseState &st,
@@ -74,7 +111,7 @@ unsigned WaveformVRulerControls::DoHandleWheelRotation(
 
    using namespace WaveTrackViewConstants;
    const bool isDB =
-      wt->GetWaveformSettings().scaleType == WaveformSettings::stLogarithmic;
+      wt->GetWaveformSettings().isLinear();
    // Special cases for Waveform dB only.
    // Set the bottom of the dB scale but only if it's visible
    if (isDB && event.ShiftDown() && event.CmdDown()) {
@@ -183,15 +220,22 @@ void WaveformVRulerControls::DoUpdateVRuler(
    const float dBRange =
       wt->GetWaveformSettings().dBRange;
 
+   if (dBRange != wt->GetLastdBRange())
+   {
+      wt->SetLastdBRange();
+      RegenerateLinearDBValues(dBRange);
+   }
+
    WaveformSettings::ScaleType scaleType =
    wt->GetWaveformSettings().scaleType;
    
-   if (scaleType == WaveformSettings::stLinear) {
+   if (wt->GetWaveformSettings().isLinear()) {
       // Waveform
       
       float min, max;
       wt->GetDisplayBounds(&min, &max);
-      if (wt->GetLastScaleType() != scaleType &&
+      if (wt->GetLastScaleType() != WaveformSettings::stLinearAmp &&
+         wt->GetLastScaleType() != WaveformSettings::stLinearDb &&
           wt->GetLastScaleType() != -1)
       {
          // do a translation into the linear space
@@ -219,22 +263,62 @@ void WaveformVRulerControls::DoUpdateVRuler(
       vruler->SetBounds(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height - 1);
       vruler->SetOrientation(wxVERTICAL);
       vruler->SetRange(max, min);
-      vruler->SetFormat(Ruler::RealFormat);
-      vruler->SetUnits({});
-      vruler->SetLabelEdges(false);
-      vruler->SetLog(false);
+      vruler->SetFormat(RealFormat);
+      if (scaleType == WaveformSettings::stLinearAmp) {
+         vruler->SetLabelEdges(false);
+         vruler->SetUnits({});
+         vruler->SetUpdater(std::make_unique<LinearUpdater>());
+      }
+      else {
+         vruler->SetLabelEdges(true);
+         vruler->SetUnits(XO("dB"));
+         vruler->SetUpdater(std::make_unique<CustomUpdaterValue>());
+         std::vector<LinearDBValues> values = { majorValues, minorValues, minorMinorValues };
+         for (int ii = 0; ii < 3; ii++) {
+            Updater::Labels labs;
+            int size = (ii == 0) ? majorValues.size() :
+               (ii == 1) ? minorValues.size() : minorMinorValues.size();
+            for (int i = 0; i < size; i++) {
+               double value = (ii == 0) ? majorValues[i] :
+                  (ii == 1) ? minorValues[i] : minorMinorValues[i];
+               Updater::Label lab;
+
+               if (value == -dBRange)
+                  lab.value = 0;
+               else {
+                  float sign = (value > -dBRange ? 1 : -1);
+                  if (value < -dBRange)
+                     value = -2 * dBRange - value;
+                  lab.value = DB_TO_LINEAR(value) * sign;
+               }
+
+               wxString s = (value == -dBRange) ?
+                  wxString(L"-\u221e") : wxString::FromDouble(value);
+               // \u221e represents the infinity symbol
+               // Should this just be -dBRange so it is consistent?
+               //wxString s = wxString::FromDouble(value);
+               lab.text = Verbatim(s);
+
+               labs.push_back(lab);
+            }
+            if (ii == 0)
+               vruler->SetCustomMajorLabels(labs);
+            else if (ii == 1)
+               vruler->SetCustomMinorLabels(labs);
+            else
+               vruler->SetCustomMinorMinorLabels(labs);
+         }
+      }
    }
    else {
-      wxASSERT(scaleType == WaveformSettings::stLogarithmic);
-      scaleType = WaveformSettings::stLogarithmic;
-      
-      vruler->SetUnits({});
+      vruler->SetUnits(XO("dB"));
       
       float min, max;
       wt->GetDisplayBounds(&min, &max);
       float lastdBRange;
       
-      if (wt->GetLastScaleType() != scaleType &&
+      if (wt->GetLastScaleType() != WaveformSettings::stLogarithmicDb &&
+         // When Logarithmic Amp happens, put that here
           wt->GetLastScaleType() != -1)
       {
          // do a translation into the dB space
@@ -328,9 +412,9 @@ void WaveformVRulerControls::DoUpdateVRuler(
       else
          vruler->SetBounds(0.0, 0.0, 0.0, 0.0); // A.C.H I couldn't find a way to just disable it?
 #endif
-      vruler->SetFormat(Ruler::RealLogFormat);
+      vruler->SetFormat(RealLogFormat);
       vruler->SetLabelEdges(true);
-      vruler->SetLog(false);
+      vruler->SetUpdater(std::make_unique<LinearUpdater>());
    }
    vruler->GetMaxSize( &wt->vrulerSize.first, &wt->vrulerSize.second );
 }
