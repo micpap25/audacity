@@ -12,6 +12,7 @@
 #define __AUDACITY_RULER__
 
 #include "wxPanelWrapper.h" // to inherit
+#include "Updater.h" // member variable
 #include "NumberScale.h" // member variable
 
 #include <wx/colour.h> // member variable
@@ -25,14 +26,6 @@ class ZoomInfo;
 
 class AUDACITY_DLL_API Ruler {
  public:
-
-   enum RulerFormat {
-      IntFormat,
-      RealFormat,
-      RealLogFormat,
-      TimeFormat,
-      LinearDBFormat,
-   };
 
    //
    // Constructor / Destructor
@@ -62,6 +55,12 @@ class AUDACITY_DLL_API Ruler {
    // (at the center of the pixel, in both cases)
    void SetRange(double min, double max, double hiddenMin, double hiddenMax);
 
+   // Set the kind of updater the ruler will use (Linear, Logarithmic, Custom, etc.)
+   void SetUpdater(std::unique_ptr<Updater> pUpdater);
+
+   // An overload to also set ZoomInfo while adjusting updater
+   void SetUpdater(std::unique_ptr<Updater> pUpdater, int leftOffset);
+
    //
    // Optional Ruler Parameters
    //
@@ -76,9 +75,6 @@ class AUDACITY_DLL_API Ruler {
    // want numbers like "1.6" formatted as "1.6 dB".
    void SetUnits(const TranslatableString &units);
    void SetDbMirrorValue( const double d );
-
-   // Logarithmic
-   void SetLog(bool log);
 
    // Minimum number of pixels between labels
    void SetSpacing(int spacing);
@@ -97,11 +93,7 @@ class AUDACITY_DLL_API Ruler {
 
    // Good defaults are provided, but you can override here
    void SetFonts(const wxFont &minorFont, const wxFont &majorFont, const wxFont &minorMinorFont);
-   struct Fonts {
-      wxFont major, minor, minorMinor;
-      int lead;
-   };
-   Fonts GetFonts() const;
+   RulerStruct::Fonts GetFonts() const;
 
    void SetNumberScale(const NumberScale &scale);
 
@@ -119,18 +111,18 @@ class AUDACITY_DLL_API Ruler {
 
    // The following functions should allow a custom ruler setup:
    // autosize is a GREAT thing, but for some applications it's
-   // useful the definition of a label array and label step by
-   // the user.
-   void SetCustomMode(bool value);
+   // useful the definition of a label array and label step by the user.
    // If this is the case, you should provide an array of labels, start
    // label position, and labels step. The range eventually specified will be
    // ignored.
+   void ResetCustomLabels(
+      bool resetMajor, bool resetMinor, bool resetMinorMinor);
    void SetCustomMajorLabels(
-      const TranslatableStrings &labels, int start, int step);
+      const Updater::Labels &labels);
    void SetCustomMinorLabels(
-      const TranslatableStrings &labels, int start, int step);
-
-   void SetUseZoomInfo(int leftOffset, const ZoomInfo *zoomInfo);
+      const Updater::Labels& labels);
+   void SetCustomMinorMinorLabels(
+      const Updater::Labels& labels);
 
    //
    // Drawing
@@ -152,143 +144,43 @@ class AUDACITY_DLL_API Ruler {
    void Invalidate();
 
  private:
-   struct TickSizes;
-
-   class Label {
-    public:
-      double value;
-      int pos;
-      int lx, ly;
-      TranslatableString text;
-
-      void Draw(wxDC &dc, bool twoTone, wxColour c) const;
-   };
-   using Labels = std::vector<Label>;
-
-   using Bits = std::vector< bool >;
 
    void ChooseFonts( wxDC &dc ) const;
 
    void UpdateCache( wxDC &dc, const Envelope* envelope ) const;
-
-   struct Updater;
    
 public:
    bool mbTicksOnly; // true => no line the length of the ruler
    bool mbTicksAtExtremes;
 
 private:
+   RulerStruct mRulerStruct;
+
    wxColour mTickColour;
    wxPen mPen;
 
-   int          mLeft, mTop, mRight, mBottom;
-   int          mLength;
+   std::unique_ptr<RulerStruct::Fonts> mpUserFonts;
 
-   std::unique_ptr<Fonts> mpUserFonts;
-   mutable std::unique_ptr<Fonts> mpFonts;
+   std::unique_ptr<Updater> mpUpdater;
 
-   double       mMin, mMax;
-   double       mHiddenMin, mHiddenMax;
+   Updater::Bits mUserBits;
 
-   Bits mUserBits;
-
-   static std::pair< wxRect, Label > MakeTick(
-      Label lab,
-      wxDC &dc, wxFont font,
-      std::vector<bool> &bits,
-      int left, int top, int spacing, int lead,
-      bool flip, int orientation );
+   Updater::Labels mCustomMajorLabels;
+   Updater::Labels mCustomMinorLabels;
+   Updater::Labels mCustomMinorMinorLabels;
 
    struct Cache;
    mutable std::unique_ptr<Cache> mpCache;
 
    // Returns 'zero' label coordinate (for grid drawing)
-   int FindZero( const Labels &labels ) const;
+   int FindZero( const Updater::Labels &labels ) const;
 
    int GetZeroPosition() const;
 
-   int          mOrientation;
-   int          mSpacing;
-   double       mDbMirrorValue;
    bool         mHasSetSpacing;
-   bool         mLabelEdges;
-   RulerFormat  mFormat;
-   bool         mLog;
-   bool         mFlip;
-   bool         mCustom;
    bool         mbMinor;
-   TranslatableString mUnits;
    bool         mTwoTone;
    const ZoomInfo *mUseZoomInfo;
-   int          mLeftOffset;
-
-   NumberScale mNumberScale;
-};
-
-class AUDACITY_DLL_API RulerPanel final : public wxPanelWrapper {
-   DECLARE_DYNAMIC_CLASS(RulerPanel)
-
- public:
-   using Range = std::pair<double, double>;
-
-   struct Options {
-      bool log { false };
-      bool flip { false };
-      bool labelEdges { false };
-      bool ticksAtExtremes { false };
-      bool hasTickColour{ false };
-      wxColour tickColour;
-
-      Options() {}
-
-      Options &Log( bool l )
-      { log = l; return *this; }
-
-      Options &Flip( bool f )
-      { flip = f; return *this; }
-
-      Options &LabelEdges( bool l )
-      { labelEdges = l; return *this; }
-
-      Options &TicksAtExtremes( bool t )
-      { ticksAtExtremes = t; return *this; }
-
-      Options &TickColour( const wxColour c )
-      { tickColour = c; hasTickColour = true; return *this; }
-   };
-
-   RulerPanel(wxWindow* parent, wxWindowID id,
-              wxOrientation orientation,
-              const wxSize &bounds,
-              const Range &range,
-              Ruler::RulerFormat format,
-              const TranslatableString &units,
-              const Options &options = {},
-              const wxPoint& pos = wxDefaultPosition,
-              const wxSize& size = wxDefaultSize);
-
-   ~RulerPanel();
-
-   void DoSetSize(int x, int y,
-                  int width, int height,
-                  int sizeFlags = wxSIZE_AUTO) override;
-
-   void OnErase(wxEraseEvent &evt);
-   void OnPaint(wxPaintEvent &evt);
-   void OnSize(wxSizeEvent &evt);
-   void SetTickColour( wxColour & c){ ruler.SetTickColour( c );}
-
-   // We don't need or want to accept focus.
-   bool AcceptsFocus() const override  { return false; }
-   // So that wxPanel is not included in Tab traversal - see wxWidgets bug 15581
-   bool AcceptsFocusFromKeyboard() const override { return false; }
-
- public:
-
-   Ruler  ruler;
-
-private:
-    DECLARE_EVENT_TABLE()
 };
 
 #endif //define __AUDACITY_RULER__

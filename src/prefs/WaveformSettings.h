@@ -56,8 +56,9 @@ public:
 
    typedef int ScaleType;
    enum ScaleTypeValues : int {
-      stLinear,
-      stLogarithmic,
+      stLinearAmp,
+      stLogarithmicDb,
+      stLinearDb,
 
       stNumScaleTypes,
    };
@@ -68,6 +69,7 @@ public:
    int dBRange;
 
    // Convenience
-   bool isLinear() const { return stLinear == scaleType; }
+   bool isLinear() const { return scaleType == stLinearAmp || scaleType == stLinearDb; }
+   bool isAmp() const { return scaleType == stLinearAmp; }
 };
 #endif
